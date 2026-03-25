@@ -108,4 +108,53 @@ def show_leaderboard():                             # displays leaderboard even 
         reader = csv.reader(file)
         for row in reader:
             print(f"{row[0]}: {row[1]} waves cleared")
+
+def play_game(player_name):
+    player = Player(player_name)
+    wave = 1
+    enemy_names = ["Thug", "Bouncer", "Rogue", "Ninja"]
+    
+    while player.is_alive():                                # allows for infinite waves
+        print(f"\n--- Wave {wave} ---")
+        enemy_name = random.choice(enemy_names)
+        enemy_hp = 30 + (wave * 15)                         # health scales with wave number
+        enemy = Enemy(enemy_name, enemy_hp)
         
+        print(f"{enemy.name} approaches!")
+        
+        while player.is_alive() and enemy.is_alive():                       # allows for combat to continue until either person dies
+            print(f"\nYou: {player.hp}HP | {enemy.name}: {enemy.hp}HP")
+            print("1: Punch (Low Risk / Low Dmg)")
+            print("2: Kick (Med Risk / Med Dmg)")
+            print("3: Gun (High Risk / High Dmg)")
+            print(f"4: heal up ({player.heals} left)")
+            
+            choice = input("choose your move. ")
+            
+            if choice in ["1", "2", "3"]:
+                result = player.attack(enemy, choice)
+                print(result)
+            elif choice == "4":
+                if player.heal():
+                    print("You healed yourself")
+                else:
+                    print("You're completely out of heals!")
+                    continue
+            else:
+                print("That's not a move. Try again.")
+                continue
+                
+            if enemy.is_alive():
+                print(enemy.enemy_turn(player))
+                
+        if player.is_alive():
+            print(f"\nYou knocked out the {enemy.name}!")
+            wave += 1
+            
+    print(f"\n Game over. You survived {wave - 1} waves.")
+    save_score(player_name, wave - 1)
+    show_leaderboard()
+
+if __name__ == "__main__":
+    name = login_system()
+    play_game(name)
