@@ -63,4 +63,49 @@ class Enemy(Fighter):
             return f"{self.name} hit you with a {name} for {dmg} damage!"
         return f"{self.name}'s {name} missed!"
 
+def validate_login(name):
+    pattern = r"^[a-zA-Z0-9]{3}$"                   # only allows 3 characters
+    return bool(re.fullmatch(pattern, name))
+
+def login_system():
+    name = input("enter a 3 character tag")
+    while not validate_login(name):
+        name = input("tag needs to be exactly 3 letters or numbers. Try again")
+    print(f"Alright {name}, lets go")
+    return name
+
+def save_score(name, waves_cleared):                    # checks if file exists and updates with new score if better
+    filename = "leaderboard.csv"
+    scores = []
+    if os.path.exists(filename):
+        with open(filename, "r") as file:
+            reader = csv.reader(file)
+            scores = list(reader)
+    
+    updated = False
+    for row in scores:
+        if row[0] == name:
+            if waves_cleared > int(row[1]):
+                row[1] = str(waves_cleared)
+            updated = True
+            break
+    
+    if not updated:
+        scores.append([name, str(waves_cleared)])
+        
+    with open(filename, "w", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerows(scores)
+
+def show_leaderboard():                             # displays leaderboard even if there is a no one on it yet
+    filename = "leaderboard.csv"
+    if not os.path.exists(filename):
+        print("\nNo one's on the board yet.")
+        return
+        
+    print("\n--- The Big Leagues ---")
+    with open(filename, "r") as file:
+        reader = csv.reader(file)
+        for row in reader:
+            print(f"{row[0]}: {row[1]} waves cleared")
         
